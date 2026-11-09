@@ -42,6 +42,9 @@ $JOGO = Get-Content -Raw -Encoding UTF8 (Join-Path $R 'jogo\jogo.json') | Conver
 $PS2RECOMP_URL = 'https://github.com/ran-j/PS2Recomp.git'
 $PS2RECOMP_SHA = 'e5636981a1c9de368f6b71e819c3dc188dfedbf4'
 $MINGIT_URL = 'https://github.com/git-for-windows/git/releases/download/v2.56.0.windows.3/MinGit-2.56.0.3-64-bit.zip'
+# AMD FidelityFX SDK (FSR 3.1: geração de quadros) na versão fixada; só os cabeçalhos e as DLLs Vulkan assinadas da AMD
+$FFX_URL = 'https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK.git'
+$FFX_TAG = 'v2.4.0'
 $T = Join-Path $R 'trabalho'
 $OUT = Join-Path $R 'out\gerar'
 New-Item -ItemType Directory -Force $OUT, $T | Out-Null
@@ -152,6 +155,34 @@ $GIT = Achar-Git
 if (-not $GIT) { Baixa-MinGit; $GIT = Achar-Git } # o portátil sumiu ou quebrou depois da etapa 1
 # o CMake baixa as dependências do PS2Recomp com o git: o portátil precisa estar no PATH
 $env:PATH = (Split-Path $GIT) + ';' + $env:PATH
+
+# ---------------------------------------------------------------------------- FSR 3.1 (opcional)
+# A geração de quadros do AMD FSR 3.1 precisa do Vulkan SDK (cabeçalhos e vulkan-1.lib) e do FidelityFX SDK (cabeçalhos e
+# as DLLs assinadas da AMD). Sem eles o jogo compila e roda igual, só que sem a opção "AMD FSR 3.1".
+if (-not $env:VULKAN_SDK -or -not (Test-Path -LiteralPath $env:VULKAN_SDK)) {
+    $vk = Get-ChildItem 'C:\VulkanSDK' -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1
+    if ($vk) { $env:VULKAN_SDK = $vk.FullName }
+}
+if ($env:VULKAN_SDK -and (Test-Path -LiteralPath (Join-Path $env:VULKAN_SDK 'Include\vulkan\vulkan.h'))) {
+    Msg "Vulkan SDK: $env:VULKAN_SDK"
+} else {
+    $env:VULKAN_SDK = $null
+    Msg 'AVISO: Vulkan SDK não encontrado; o jogo compila sem o AMD FSR 3.1 (instale com: winget install KhronosGroup.VulkanSDK, depois gere com -RefazerDe 6)'
+}
+$FFX = Join-Path $R 'dl\fidelityfx\sdk'
+if (-not (Test-Path -LiteralPath (Join-Path $FFX 'Kits\FidelityFX\api\include\ffx_api.h'))) {
+    try {
+        Msg "baixando o AMD FidelityFX SDK $FFX_TAG (só os cabeçalhos e as DLLs Vulkan)"
+        if (Test-Path -LiteralPath $FFX) { Remove-Item -LiteralPath $FFX -Recurse -Force }
+        $logFfx = Join-Path $OUT 'fidelityfx.log'
+        Anotar $logFfx "== FidelityFX $(Get-Date)" -Novo
+        Exec $logFfx "`"$GIT`" -c safe.directory=* clone --quiet --depth 1 --branch $FFX_TAG --filter=blob:none --no-checkout $FFX_URL `"$FFX`""
+        Exec $logFfx "`"$GIT`" -c safe.directory=* -C `"$FFX`" sparse-checkout set --no-cone /Kits/FidelityFX/api/include/ /Kits/FidelityFX/framegeneration/include/ /Kits/FidelityFX/upscalers/include/ /Kits/FidelityFX/signedbin/amd_fidelityfx_loader_vk.dll /Kits/FidelityFX/signedbin/amd_fidelityfx_framegeneration_vk.dll"
+        Exec $logFfx "`"$GIT`" -c safe.directory=* -C `"$FFX`" checkout --quiet $FFX_TAG"
+    } catch {
+        Msg "AVISO: não deu para baixar o FidelityFX SDK; o jogo compila sem o AMD FSR 3.1. $($_.Exception.Message)"
+    }
+}
 # o vcvars64.bat procura o vswhere.exe no PATH
 $env:PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer;" + $env:PATH
 $VCVARS = Join-Path $VS 'VC\Auxiliary\Build\vcvars64.bat'
@@ -249,7 +280,7 @@ Etapa '4_traduzir' {
     New-Item -ItemType Directory -Force $g | Out-Null
     Msg 'traduzindo o código do jogo (alguns minutos)'
     Exec $LOG "`"$($RECOMP.FullName)`" `"$T\config.toml`""
-    Exec $LOG "python `"$R\ferramentas\sincroniza.py`" `"$g`" `"$P\ps2xRuntime\src\runner`" `"$P\ps2xRuntime\include`""
+    Exec $LOG "python `"$R\ferramentas\sincroniza.py`" `"$g`" `"$P\ps2xRuntime\src\runner`" `"$P\ps2xRuntime\include`" `"$R\jogo\overrides`""
 }
 
 # ---------------------------------------------------------------------------- VU1 (geometria)
@@ -302,7 +333,8 @@ Etapa '6_compilar' {
            "`"-DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO=/INCREMENTAL:NO`" -DPS2X_ENABLE_AGRESSIVE_LOGS=OFF -DPS2X_ENABLE_IOP_RPC_TRACE=OFF " +
            "-DPS2X_SHOW_WINDOWS_CONSOLE=OFF -DPS2X_BUILD_TEST=OFF -DPS2X_BUILD_STUDIO=OFF -DPS2X_BUILD_ANALYZER=OFF " +
            "`"-DPS2X_VU1_LANCADOR=$lancador`""
-    Exec $LOG (ComVS "cmake -S `"$P`" -B `"$BJ`" -G Ninja $cfg")
+    # -UVulkan_*: refaz a busca do Vulkan SDK (instalado depois de uma geração anterior)
+    Exec $LOG (ComVS "cmake -UVulkan_* -S `"$P`" -B `"$BJ`" -G Ninja $cfg")
     Exec $LOG (ComVS "cmake --build `"$BJ`" --target ps2EntryRunner --parallel $Jobs")
     if (-not (Test-Path (Join-Path $BJ 'ps2xRuntime\ps2EntryRunner.exe'))) { throw "o executável não foi gerado (veja $LOG)" }
 }
@@ -313,10 +345,18 @@ Etapa '7_jogar' {
     New-Item -ItemType Directory -Force $bin | Out-Null
     Copy-Item (Join-Path $BJ 'ps2xRuntime\ps2EntryRunner.exe') (Join-Path $bin $JOGO.exe) -Force
     Copy-Item (Join-Path $BJ 'ps2xRuntime\*.dll') $bin -Force
+    # FSR 3.1: as DLLs assinadas da AMD ficam ao lado do exe (o jogo as carrega só com a opção ligada)
+    foreach ($dll in 'amd_fidelityfx_loader_vk.dll', 'amd_fidelityfx_framegeneration_vk.dll') {
+        $f = Join-Path $R "dl\fidelityfx\sdk\Kits\FidelityFX\signedbin\$dll"
+        if (Test-Path -LiteralPath $f) { Copy-Item -LiteralPath $f $bin -Force }
+    }
     # variáveis do jogo (jogo.json "ambiente") ao lado do exe: o runtime lê ao abrir, sem passar por cima das que já
     # vierem definidas (assim o launcher, que abre o exe direto, e o jogar.cmd rodam o jogo do mesmo jeito)
     $ambTxt = @('# gerado pelo gerar.ps1 a partir do jogo\jogo.json ("ambiente"): NOME=valor')
     if ($JOGO.ambiente) { foreach ($v in $JOGO.ambiente.PSObject.Properties) { $ambTxt += "$($v.Name)=$($v.Value)" } }
+    # jogo\ambiente_usuario.txt (opcional): ajustes do jogador (vídeo etc.), que sobrevivem a uma nova geração
+    $ambUsuario = Join-Path $R 'jogo\ambiente_usuario.txt'
+    if (Test-Path $ambUsuario) { $ambTxt += @(Get-Content $ambUsuario -Encoding UTF8 | Where-Object { $_ -match '=' -and $_ -notmatch '^\s*#' }) }
     [IO.File]::WriteAllLines((Join-Path $bin 'ambiente.txt'), [string[]]$ambTxt, (New-Object Text.UTF8Encoding $false))
     $raizCd = if ($JOGO.cd_root) { "%RAIZ%trabalho\disc\$($JOGO.cd_root)" } else { '%RAIZ%trabalho\disc' }
     # variáveis do jogo (jogo.json "ambiente"), sem passar por cima das que o jogador já definiu

@@ -18,6 +18,8 @@
         "PS2X_GS_FILA": "65536",
         "PS2X_MTVU_FILA": "2048",
         "PS2X_GS_THREADS": "4",
+        "PS2X_GS_PRE": "0",
+        "PS2X_MC_SIO2": "1",
         "PS2X_GS_GIRO": "0",
         "PS2X_ASPECTO_ENDS": "363810,32F338,32F300",
         "PS2X_RELOGIO_REAL": "1",

@@ -1,1 +1,2 @@
 sceCdInit  # Otavix 30/10: o libcdvd do GoW roda o código original (RPC para o cdvdfsv do host); o init faz os sceSifBindRpc
+rand  # Claude 05/11: o rand do runtime (0..0x7FFF) nao e o do jogo (newlib, 31 bits): o jogo escala por 2^-31 e toda particula recebia deslocamento ~0

@@ -1,3 +1,128 @@
+# Fork: AMD FSR 3.1 e correções de desempenho (feito com IA)
+
+> **Tudo neste fork foi feito com IA.** O código, os testes, este texto, o próprio fork no GitHub e a issue enviada ao
+> criador foram escritos pelo **Claude** (modelo de IA da Anthropic), conduzido por um usuário (`niw-maker`) que pediu as
+> melhorias e jogou para conferir.
+>
+> **O jogo inteiro ainda não foi testado.** Os testes foram automatizados pela IA (roteiros de botões, medição de tempo de
+> cada quadro, gravação e análise de vídeo e de som) na abertura, na primeira área e em 7 saves, mais algumas partidas do
+> usuário. Ninguém jogou do começo ao fim com estas mudanças. Espere bugs.
+>
+> **Você precisa da sua própria ISO** do *God of War II* (EUA, SCUS-97481). Nada do jogo vem neste repositório, e nenhuma
+> ISO deve ser enviada a ele.
+
+[English below](#fork-ai-made-amd-fsr-31-and-performance-fixes)
+
+![antes e agora](docs/comparacao.gif)
+
+*À esquerda, o port original 0.1.3 como foi baixado; à direita, este fork, na mesma área, com o medidor de FPS (F10).*
+
+## Base
+
+Este fork parte da **versão 0.1.3** do port do [otavix010](https://github.com/otavix010/god-of-war-2-pc) (commit `96c38ea`),
+que ainda gerava o jogo com o PS2Recomp e patches. A partir da 0.1.4 o criador passou a usar um motor próprio, distribuído
+compilado, e estas mudanças não se aplicam a ele diretamente. Elas estão no patch `patches/zz_claude_gs_audio.patch` (sobre o
+PS2Recomp fixado) e nos arquivos listados abaixo, para quem quiser levá-las adiante.
+
+## O que muda
+
+**Imagem e fluidez**
+- **AMD FSR 3.1 (geração de quadros)**, opção "AMD FSR 3.1 (recomendado)" no launcher: o jogo continua desenhando em OpenGL,
+  e a imagem final passa por uma apresentação em Vulkan, onde o swapchain do FSR 3.1 (FidelityFX SDK 2.4, DLLs assinadas da
+  AMD) gera um quadro entre cada dois. Na RTX 3060 a AMD escolhe a versão 3.1.6. Cortes de câmera recomeçam a interpolação;
+  vídeos (FMV) passam sem geração.
+- **Um quadro em cada quatro se perdia** entre o jogo e a janela (a janela capturava por vsync, fora de fase com as cópias
+  do jogo): agora todos os quadros chegam à tela, com ou sem o FSR.
+- **Pausas da tela de 70 a 400 ms** vindas da thread da janela (um registro de depuração que travava um mutex do GS e a
+  gravação do registro de quadros no disco) foram eliminadas.
+- **Thread de desenho do GS pelo launcher**: o `ambiente.txt` era lido depois de o GS decidir se usava a thread própria.
+  (O criador corrigiu o mesmo problema no motor 0.1.2.)
+
+**Launcher (`launcher\`)**
+- Aba **Instalação**: instala as dependências pelo winget e gera o jogo a partir da sua ISO, sem terminal.
+- **Diagnóstico completo**: cada partida grava em `out\diagnosticos` o registro, o tempo de cada quadro, um vídeo da janela
+  (ffmpeg) e as opções usadas.
+- Medidor (F10) com os quadros gerados: "FPS x + y gerados = z na tela".
+
+**Jogo**
+- Start pula as cutscenes em vídeo; o volume dos vídeos segue o volume do jogo.
+- Relógio do cartão de memória no fuso do PS2 japonês (data dos saves correta); F5 abre o menu de salvar em qualquer ponto
+  (`jogar_dev.cmd`).
+- Espera do FINISH do GS adaptativa (sem ela nas áreas pesadas, onde o processador e o GS trabalham em paralelo).
+
+## Medido (i7-10700, RTX 3060, tela cheia 1080p, FSR 1 + FXAA, aberto pelo launcher)
+
+| Trecho | 0.1.3 original | Este fork |
+|---|---|---|
+| Primeira área, combate | ~30 fps (vsync), linha bugada embaixo | 38-44 fps reais, 79-88 na tela com o FSR 3.1 |
+| Saves com pouca luta (7 testados) | 47-60 | 58-60 |
+
+## Como gerar
+
+1. Coloque a pasta do projeto num caminho **sem espaços**, com uns 25 GB livres.
+2. Compile o launcher: clique duas vezes em `launcher\compilar.cmd` (usa o compilador C# que já vem no Windows) e abra
+   `GoW2 Launcher.exe`.
+3. Na aba **Instalação**: "Instalar dependências" (Python 3.12, Visual Studio 2022 Build Tools com C++, CMake e Clang, Vulkan
+   SDK) e depois "Escolher a ISO e gerar o jogo".
+4. Clique em **JOGAR**. Em "Frame generation", escolha "AMD FSR 3.1 (recomendado)".
+
+Sem o launcher: `gerar.cmd` e `jogar.cmd`, como no original. Sem o Vulkan SDK, o jogo compila igual, só que sem o FSR 3.1.
+
+## Problemas conhecidos
+- A ampliação temporal do FSR 3.1 não foi feita: precisa de vetores de movimento, e a câmera da memória do jogo não explica
+  um balanço de 6-7 px por quadro (investigação em andamento).
+- Nas áreas mais pesadas o jogo fica em ~38-45 fps reais num i7-10700 (a emulação do VU1 é o gargalo).
+- O erro `989 ERROR 55` do som apareceu uma vez ao carregar um save e não se repetiu.
+- O aviso "controle removido" apareceu uma vez ao ligar o DualSense com o jogo aberto.
+
+## Créditos
+- Port original: [otavix010](https://github.com/otavix010/god-of-war-2-pc).
+- Ideias e endereços da espera do FINISH: [cxldsakeb](https://github.com/cxldsakeb) (GoW2-nativo-PS2, GPL-3.0).
+- [PS2Recomp](https://github.com/ran-j/PS2Recomp) (ran-j); [AMD FidelityFX SDK](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK)
+  (licença MIT; as DLLs são baixadas pelo gerador, não vêm no repositório).
+
+---
+
+# Fork (AI-made): AMD FSR 3.1 and performance fixes
+
+> **Everything in this fork was made with AI.** The code, the tests, this text, the GitHub fork itself and the issue sent
+> to the original author were written by **Claude** (Anthropic's AI model), directed by a user (`niw-maker`) who asked for
+> the improvements and played to check them.
+>
+> **The whole game has not been tested yet.** Testing was automated by the AI (button scripts, per-frame timing, video and
+> audio capture and analysis) on the intro, the first area and 7 saves, plus a few play sessions by the user. Nobody has
+> played it start to finish with these changes. Expect bugs.
+>
+> **You need your own ISO** of *God of War II* (USA, SCUS-97481). No game data is in this repository, and no ISO should
+> ever be uploaded to it.
+
+Based on the original port's **0.1.3** (commit `96c38ea`, PS2Recomp + patches). From 0.1.4 on the author uses his own
+prebuilt engine, so these changes don't apply to it directly; they live in `patches/zz_claude_gs_audio.patch` and the files
+below for anyone who wants to carry them forward.
+
+**Changes:** AMD FSR 3.1 frame generation through a Vulkan presenter on top of the OpenGL renderer (FidelityFX SDK 2.4,
+AMD-signed DLLs; scene cuts reset it, FMVs pass through); one frame in four was being lost between the game and the window
+(fixed); 70-400 ms window stalls removed; the launcher lost the GS drawing thread because `ambiente.txt` was read too late
+(also fixed by the author in engine 0.1.2); a launcher with an **Install** tab (dependencies via winget, generate from your
+ISO) and a **full diagnostics** mode (log, frame times, window video); FPS meter shows generated frames; Start skips FMVs;
+FMV volume follows the game; memory card clock; adaptive GS FINISH wait.
+
+**Measured** (i7-10700, RTX 3060, fullscreen 1080p, from the launcher): first area ~30 fps → 38-44 real fps, 79-88 shown
+with FSR 3.1; light saves 47-60 → 58-60.
+
+**How to build:** folder path without spaces, ~25 GB free; run `launcher\compilar.cmd`, open `GoW2 Launcher.exe`, Install
+tab → "Install dependencies" → "Choose the ISO and generate"; then PLAY with "AMD FSR 3.1" selected.
+
+**Known issues:** no FSR 3.1 temporal upscaling yet (motion vectors); heaviest areas ~38-45 real fps on an i7-10700 (VU1
+emulation bound); one-off `989 ERROR 55` sound error and one "controller removed" message on hot-plug.
+
+**Credits:** otavix010 (original port), cxldsakeb (FINISH-wait idea and addresses, GoW2-nativo-PS2, GPL-3.0), ran-j
+(PS2Recomp), AMD (FidelityFX SDK, MIT).
+
+---
+
+*Abaixo, o README original da versão 0.1.3 do criador / original 0.1.3 README by the author:*
+
 # God of War II — port nativo para PC
 
 > **Projeto de fãs, sem fins lucrativos.** *God of War II* e *God of War* são marcas da Sony Interactive Entertainment; o jogo foi desenvolvido pelo Santa Monica Studio. Este projeto não tem relação com a Sony Interactive Entertainment. Este repositório **não contém o jogo**: você precisa da **sua própria cópia** do DVD (a versão americana, **SCUS-97481**).

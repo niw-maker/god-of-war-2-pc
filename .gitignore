@@ -5,3 +5,10 @@ bin/
 dl/
 jogar.cmd
 *.iso
+
+# fork: arquivos locais que não vão para o repositório
+out_gerar*.txt
+geracao.log
+__pycache__/
+jogo/ambiente_usuario.txt
+*.exe
