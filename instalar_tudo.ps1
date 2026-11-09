@@ -34,9 +34,10 @@ function TemVS {
     return [bool]$p
 }
 
-function Winget($id, $extra = @()) {
+# não pode se chamar Winget: o PowerShell não diferencia maiúsculas, e o & winget de dentro chamaria a própria função
+function InstalaPeloWinget($id, $extra = @()) {
     $a = @('install', '--id', $id, '-e', '--accept-source-agreements', '--accept-package-agreements') + $extra
-    & winget @a
+    & winget.exe @a
 }
 
 Write-Host 'God of War II (fork feito com IA) - instalação' -ForegroundColor Yellow
@@ -50,20 +51,20 @@ if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
 }
 
 Msg '1/4  Python'
-if (TemPython) { Write-Host 'já instalado' } else { Winget 'Python.Python.3.12' @('--scope', 'machine'); RecarregaPath }
+if (TemPython) { Write-Host 'já instalado' } else { InstalaPeloWinget 'Python.Python.3.12' @('--scope', 'machine'); RecarregaPath }
 
 Msg '2/4  Compilador C++ (Visual Studio 2022 Build Tools). É o passo mais demorado.'
 if (TemVS) { Write-Host 'já instalado' } else {
-    Winget 'Microsoft.VisualStudio.2022.BuildTools' @('--override', '--quiet --wait --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.VisualStudio.Component.VC.Llvm.Clang --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --includeRecommended')
+    InstalaPeloWinget 'Microsoft.VisualStudio.2022.BuildTools' @('--override', '--quiet --wait --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.VisualStudio.Component.VC.Llvm.Clang --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --includeRecommended')
 }
 
 Msg '3/4  Vulkan SDK (para o AMD FSR 3.1)'
 RecarregaPath
-if ($env:VULKAN_SDK -and (Test-Path $env:VULKAN_SDK)) { Write-Host 'já instalado' } else { Winget 'KhronosGroup.VulkanSDK'; RecarregaPath }
+if ($env:VULKAN_SDK -and (Test-Path $env:VULKAN_SDK)) { Write-Host 'já instalado' } else { InstalaPeloWinget 'KhronosGroup.VulkanSDK'; RecarregaPath }
 
 if ($Ffmpeg) {
     Msg 'ffmpeg (vídeo do diagnóstico)'
-    if (Get-Command ffmpeg -ErrorAction SilentlyContinue) { Write-Host 'já instalado' } else { Winget 'Gyan.FFmpeg'; RecarregaPath }
+    if (Get-Command ffmpeg -ErrorAction SilentlyContinue) { Write-Host 'já instalado' } else { InstalaPeloWinget 'Gyan.FFmpeg'; RecarregaPath }
 }
 
 RecarregaPath
