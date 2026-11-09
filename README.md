@@ -15,7 +15,7 @@
 
 ![antes e agora](docs/comparacao.gif)
 
-*À esquerda, o port original 0.1.3 como foi baixado; à direita, este fork, na mesma área, com o medidor de FPS (F10). Jogado pelo usuário, sem som, na mesma máquina. [Vídeo de 25 s em 60 fps](docs/comparacao.mp4).*
+*À esquerda, o port original 0.1.3 como foi baixado; à direita, este fork, na mesma área, com o medidor de FPS (F10). Jogado pelo usuário, sem som, na mesma máquina. O GIF tem 50 quadros por segundo (o máximo do formato); para ver a fluidez completa, baixe o [vídeo de 25 s em 60 fps](docs/comparacao.mp4). A gravação da tela foi feita a 60 fps, então os quadros gerados acima disso não aparecem nela.*
 
 ## Base
 
@@ -109,7 +109,7 @@ FMV volume follows the game; memory card clock; adaptive GS FINISH wait.
 
 ![before and after](docs/comparacao.gif)
 
-*Left: original 0.1.3 as downloaded; right: this fork, same area, FPS meter on. Played by the user, same PC. [25 s video](docs/comparacao.mp4).*
+*Left: original 0.1.3 as downloaded; right: this fork, same area, FPS meter on. Played by the user, same PC. The GIF runs at 50 fps (the format's practical limit); download the [25 s 60 fps video](docs/comparacao.mp4) to see the full smoothness. The screen capture ran at 60 fps, so generated frames above that aren't in it.*
 
 **Measured** (i7-10700, RTX 3060, fullscreen 1080p, from the launcher): first-area combat 12-19 fps → 34-49 real fps, ~70-90 shown
 with FSR 3.1; light saves 47-60 → 58-60.
