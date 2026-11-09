@@ -356,12 +356,12 @@ sealed class Janela : Form
         if (!Pergunta("Instalar as dependências pelo winget? Uma janela vai mostrar o andamento.")) return;
         var k = kFfmpegDep;
         var cmds = new List<string> {
-            "winget install --id Python.Python.3.12 -e --accept-source-agreements --accept-package-agreements",
-            "winget install --id Microsoft.VisualStudio.2022.BuildTools -e --accept-source-agreements --accept-package-agreements --override " +
+            "winget install --id Python.Python.3.12 -e --source winget --accept-source-agreements --accept-package-agreements",
+            "winget install --id Microsoft.VisualStudio.2022.BuildTools -e --source winget --accept-source-agreements --accept-package-agreements --override " +
                 "'--quiet --wait --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.CMake.Project " +
                 "--add Microsoft.VisualStudio.Component.VC.Llvm.Clang --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --includeRecommended'",
-            "winget install --id KhronosGroup.VulkanSDK -e --accept-source-agreements --accept-package-agreements" };
-        if (k != null && k.Checked) cmds.Add("winget install --id Gyan.FFmpeg -e --accept-source-agreements --accept-package-agreements");
+            "winget install --id KhronosGroup.VulkanSDK -e --source winget --accept-source-agreements --accept-package-agreements" };
+        if (k != null && k.Checked) cmds.Add("winget install --id Gyan.FFmpeg -e --source winget --accept-source-agreements --accept-package-agreements");
         string script = "Write-Host 'Instalando as dependencias do God of War II (pode levar de 10 a 30 minutos)' -ForegroundColor Cyan; " +
             string.Join("; ", cmds) + "; Write-Host ''; Write-Host 'Pronto. Feche esta janela e abra o launcher de novo.' -ForegroundColor Green";
         try { Process.Start(new ProcessStartInfo("powershell.exe", "-NoProfile -NoExit -ExecutionPolicy Bypass -Command \"" + script + "\"") { UseShellExecute = true }); }

@@ -36,7 +36,8 @@ function TemVS {
 
 # não pode se chamar Winget: o PowerShell não diferencia maiúsculas, e o & winget de dentro chamaria a própria função
 function InstalaPeloWinget($id, $extra = @()) {
-    $a = @('install', '--id', $id, '-e', '--accept-source-agreements', '--accept-package-agreements') + $extra
+    # --source winget: num Windows novo a loja msstore também responde, dá erro e o winget se recusa a escolher
+    $a = @('install', '--id', $id, '-e', '--source', 'winget', '--accept-source-agreements', '--accept-package-agreements') + $extra
     & winget.exe @a
 }
 
@@ -68,8 +69,8 @@ if ($Ffmpeg) {
 }
 
 RecarregaPath
-if (-not (TemPython)) { Fim 'O Python não ficou disponível. Feche esta janela, reinicie o PC e clique no botão de novo.' Red }
-if (-not (TemVS)) { Fim 'O compilador C++ não ficou instalado. Reinicie o PC e clique no botão de novo.' Red }
+if (-not (TemPython)) { Fim 'O Python não foi instalado (veja as mensagens acima). Reinicie o PC e clique no botão de novo; se repetir, instale o Python 3.12 pelo site python.org.' Red }
+if (-not (TemVS)) { Fim 'O compilador C++ não foi instalado (veja as mensagens acima). Reinicie o PC e clique no botão de novo.' Red }
 
 Msg '4/4  Gerando o jogo a partir da sua ISO (30 minutos a 1 hora)'
 & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $R 'gerar.ps1') -Iso $Iso
