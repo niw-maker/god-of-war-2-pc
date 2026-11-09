@@ -57,14 +57,19 @@ PS2Recomp fixado) e nos arquivos listados abaixo, para quem quiser levá-las adi
 | Primeira área, combate | 12-19 fps, linha bugada embaixo | 34-49 fps reais, ~70-90 na tela com o FSR 3.1 |
 | Saves com pouca luta (7 testados) | 47-60 | 58-60 |
 
-## Como gerar
+## Como instalar (jeito fácil)
 
-1. Coloque a pasta do projeto num caminho **sem espaços**, com uns 25 GB livres.
-2. Compile o launcher: clique duas vezes em `launcher\compilar.cmd` (usa o compilador C# que já vem no Windows) e abra
-   `GoW2 Launcher.exe`.
-3. Na aba **Instalação**: "Instalar dependências" (Python 3.12, Visual Studio 2022 Build Tools com C++, CMake e Clang, Vulkan
-   SDK) e depois "Escolher a ISO e gerar o jogo".
-4. Clique em **JOGAR**. Em "Frame generation", escolha "AMD FSR 3.1 (recomendado)".
+1. Baixe o instalador `GoW2-fork-IA-setup-*.exe` na página de [Releases](https://github.com/niw-maker/god-of-war-2-pc/releases/latest)
+   e instale (pasta padrão `C:\GoW2`; ele cria atalhos no Menu Iniciar e na Área de Trabalho).
+2. Abra o **God of War II** pelo atalho. Na aba **Instalação**, clique em **"Instalar tudo e gerar o jogo"** e escolha a **sua** ISO.
+   Uma janela instala o que faltar (Python, compilador C++, Vulkan SDK) e gera o jogo: espere ela dizer **PRONTO**
+   (30 min a 1h30; se o Windows pedir permissão, clique em Sim).
+3. Clique em **JOGAR**. Em "Frame generation", deixe "AMD FSR 3.1 (recomendado)".
+
+Precisa de Windows 10/11 de 64 bits, processador com AVX2, 16 GB de RAM e uns 25 GB livres.
+
+**Sem o instalador:** com o código deste repositório numa pasta sem espaços, clique duas vezes em `launcher\compilar.cmd` e
+abra `GoW2 Launcher.exe`, ou rode `instalar_tudo.ps1 -Iso <sua ISO>`.
 
 Sem o launcher: `gerar.cmd` e `jogar.cmd`, como no original. Sem o Vulkan SDK, o jogo compila igual, só que sem o FSR 3.1.
 
@@ -114,8 +119,9 @@ FMV volume follows the game; memory card clock; adaptive GS FINISH wait.
 **Measured** (i7-10700, RTX 3060, fullscreen 1080p, from the launcher): first-area combat 12-19 fps → 34-49 real fps, ~70-90 shown
 with FSR 3.1; light saves 47-60 → 58-60.
 
-**How to build:** folder path without spaces, ~25 GB free; run `launcher\compilar.cmd`, open `GoW2 Launcher.exe`, Install
-tab → "Install dependencies" → "Choose the ISO and generate"; then PLAY with "AMD FSR 3.1" selected.
+**How to install:** download `GoW2-fork-IA-setup-*.exe` from [Releases](https://github.com/niw-maker/god-of-war-2-pc/releases/latest),
+install it (default `C:\GoW2`, Start menu and desktop shortcuts), open it, Install tab → "Instalar tudo e gerar o jogo" and pick
+**your** ISO; one window installs what's missing (Python, C++ build tools, Vulkan SDK) and generates the game. Then PLAY.
 
 **Known issues:** no FSR 3.1 temporal upscaling yet (motion vectors); heaviest areas ~38-45 real fps on an i7-10700 (VU1
 emulation bound); one-off `989 ERROR 55` sound error and one "controller removed" message on hot-plug.

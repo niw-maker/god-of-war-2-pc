@@ -301,27 +301,54 @@ sealed class Janela : Form
     TabPage AbaInstalacao()
     {
         var a = Aba("Instalação");
-        Nota(a, "1. Instale as dependências (uma vez só). Abre uma janela do Windows que instala, pelo winget: Python 3.12, " +
-            "Visual Studio 2022 Build Tools (C++, CMake e Clang) e Vulkan SDK (para o AMD FSR 3.1). Pode pedir permissão de administrador " +
-            "e levar de 10 a 30 minutos. Depois, feche e abra o launcher.", 14, 76);
-        var bDep = Botao("Instalar dependências", new Point(16, 94), 260);
+        // jeito fácil: um botão escolhe a ISO e uma janela só instala o que falta e gera o jogo (instalar_tudo.ps1)
+        var bTudo = Botao("Instalar tudo e gerar o jogo (recomendado)", new Point(16, 12), 535);
+        bTudo.Height = 44;
+        bTudo.BackColor = Vermelho; bTudo.ForeColor = Color.White;
+        bTudo.Font = new Font("Segoe UI", 11f, FontStyle.Bold);
+        bTudo.Click += (s, e) => InstalaTudo();
+        a.Controls.Add(bTudo);
+        Nota(a, "Escolha a ISO do SEU God of War II (EUA, SCUS-97481) e espere a janela dizer PRONTO (30 min a 1h30). " +
+            "Se pedir permissão de administrador, clique em Sim.", 62, 40);
+        Nota(a, "Passo a passo (avançado):", 104, 20);
+        Nota(a, "1. Instalar as dependências pelo winget: Python 3.12, Visual Studio 2022 Build Tools (C++, CMake, Clang) " +
+            "e Vulkan SDK. Depois, feche e abra o launcher.", 128, 40);
+        var bDep = Botao("Instalar dependências", new Point(16, 170), 260);
         bDep.Click += (s, e) => InstalaDependencias();
         a.Controls.Add(bDep);
-        kFfmpegDep = new CheckBox { Text = "Também o ffmpeg (vídeo do modo diagnóstico)", Location = new Point(290, 98), Size = new Size(270, 24) };
+        kFfmpegDep = new CheckBox { Text = "Também o ffmpeg (diagnóstico)", Location = new Point(290, 174), Size = new Size(260, 24) };
         a.Controls.Add(kFfmpegDep);
-        Nota(a, "2. Gere o jogo a partir da SUA ISO do God of War II (EUA, SCUS-97481). Nada do jogo vem com este projeto. " +
-            "A pasta do projeto precisa estar num caminho sem espaços e ter uns 25 GB livres; a geração leva de 30 minutos a 1 hora " +
-            "(16 GB de RAM e processador com AVX2). Para atualizar depois de baixar uma versão nova, use \"Gerar de novo\".", 140, 76);
-        var bGera = Botao("Escolher a ISO e gerar o jogo", new Point(16, 220), 260);
+        Nota(a, "2. Gerar o jogo da sua ISO (pasta sem espaços, ~25 GB livres, 16 GB de RAM, processador com AVX2). " +
+            "Depois de atualizar o projeto, use \"Gerar de novo\".", 216, 40);
+        var bGera = Botao("Escolher a ISO e gerar o jogo", new Point(16, 258), 260);
         bGera.Click += (s, e) => GeraJogo(0);
         a.Controls.Add(bGera);
-        var bRegera = Botao("Gerar de novo (sem extrair o disco)", new Point(290, 220), 255);
+        var bRegera = Botao("Gerar de novo (sem extrair o disco)", new Point(290, 258), 260);
         bRegera.Click += (s, e) => GeraJogo(3);
         dica.SetToolTip(bRegera, "Aplica as correções novas, retraduz e recompila (gerar.cmd -RefazerDe 3).");
         a.Controls.Add(bRegera);
         Nota(a, "Tudo neste port foi feito com IA (Claude). O jogo inteiro ainda não foi testado do começo ao fim: só testes " +
-            "automatizados e partidas de quem usa. Relate o que encontrar.", 270, 50);
+            "automatizados e partidas de quem usa. Relate o que encontrar.", 310, 40);
         return a;
+    }
+
+    void InstalaTudo()
+    {
+        if (raiz.Contains(" ")) { Avisa("Mova a pasta do projeto para um caminho sem espaços (agora: " + raiz + ")."); return; }
+        string script = Path.Combine(raiz, "instalar_tudo.ps1");
+        if (!File.Exists(script)) { Avisa("Não achei o instalar_tudo.ps1 ao lado do launcher."); return; }
+        using (var d = new OpenFileDialog { Title = "Escolha a ISO do God of War II (EUA, SCUS-97481)", Filter = "Imagem de DVD (*.iso)|*.iso|Todos os arquivos (*.*)|*.*" })
+        {
+            if (d.ShowDialog(this) != DialogResult.OK) return;
+            string args = "-NoProfile -ExecutionPolicy Bypass -File \"" + script + "\" -Iso \"" + d.FileName + "\"";
+            if (kFfmpegDep != null && kFfmpegDep.Checked) args += " -Ffmpeg";
+            try
+            {
+                Process.Start(new ProcessStartInfo("powershell.exe", args) { UseShellExecute = true, WorkingDirectory = raiz });
+                lEstado.Text = "Instalando e gerando o jogo na outra janela. Quando ela disser PRONTO, clique em JOGAR.";
+            }
+            catch (Exception e) { Avisa("Não consegui iniciar a instalação: " + e.Message); }
+        }
     }
 
     void InstalaDependencias()

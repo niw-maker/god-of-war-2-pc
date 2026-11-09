@@ -1,0 +1,21 @@
+﻿God of War II - port nativo para PC (fork feito com IA)
+
+LEIA ANTES DE INSTALAR
+
+* Tudo neste fork foi feito com IA (Claude, da Anthropic): o código, os testes, o instalador e os textos.
+* O jogo inteiro ainda NÃO foi testado do começo ao fim. Houve só testes automatizados pela IA e algumas partidas. Espere bugs.
+* O jogo NÃO vem neste instalador. Você precisa da SUA própria ISO do God of War II (versão americana, SCUS-97481). O seu PC gera e compila o jogo a partir dela.
+
+O que você precisa:
+* Windows 10 ou 11 de 64 bits, com o winget (vem com o Windows).
+* Processador com AVX2 e 16 GB de RAM.
+* Uns 25 GB livres no disco onde instalar.
+* Internet (para baixar o compilador e as outras dependências).
+
+Como usar, depois de instalar:
+1. Abra o "God of War II" pelo atalho. O launcher abre na aba Instalação.
+2. Clique em "Instalar tudo e gerar o jogo" e escolha a sua ISO.
+3. Espere a janela dizer PRONTO (de 30 minutos a 1 hora e meia). Se o Windows pedir permissão de administrador, clique em Sim.
+4. Clique em JOGAR. Em "Frame generation", deixe "AMD FSR 3.1 (recomendado)".
+
+Port original: otavix010 (github.com/otavix010/god-of-war-2-pc). God of War é marca da Sony Interactive Entertainment; este projeto de fãs não tem relação com ela.
