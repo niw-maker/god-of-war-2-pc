@@ -15,7 +15,7 @@
 
 ![antes e agora](docs/comparacao.gif)
 
-*À esquerda, o port original 0.1.3 como foi baixado; à direita, este fork, na mesma área, com o medidor de FPS (F10).*
+*À esquerda, o port original 0.1.3 como foi baixado; à direita, este fork, na mesma área, com o medidor de FPS (F10). Jogado pelo usuário, sem som, na mesma máquina. [Vídeo de 25 s em 60 fps](docs/comparacao.mp4).*
 
 ## Base
 
@@ -54,7 +54,7 @@ PS2Recomp fixado) e nos arquivos listados abaixo, para quem quiser levá-las adi
 
 | Trecho | 0.1.3 original | Este fork |
 |---|---|---|
-| Primeira área, combate | ~30 fps (vsync), linha bugada embaixo | 38-44 fps reais, 79-88 na tela com o FSR 3.1 |
+| Primeira área, combate | 12-19 fps, linha bugada embaixo | 34-49 fps reais, ~70-90 na tela com o FSR 3.1 |
 | Saves com pouca luta (7 testados) | 47-60 | 58-60 |
 
 ## Como gerar
@@ -107,7 +107,11 @@ AMD-signed DLLs; scene cuts reset it, FMVs pass through); one frame in four was 
 ISO) and a **full diagnostics** mode (log, frame times, window video); FPS meter shows generated frames; Start skips FMVs;
 FMV volume follows the game; memory card clock; adaptive GS FINISH wait.
 
-**Measured** (i7-10700, RTX 3060, fullscreen 1080p, from the launcher): first area ~30 fps → 38-44 real fps, 79-88 shown
+![before and after](docs/comparacao.gif)
+
+*Left: original 0.1.3 as downloaded; right: this fork, same area, FPS meter on. Played by the user, same PC. [25 s video](docs/comparacao.mp4).*
+
+**Measured** (i7-10700, RTX 3060, fullscreen 1080p, from the launcher): first-area combat 12-19 fps → 34-49 real fps, ~70-90 shown
 with FSR 3.1; light saves 47-60 → 58-60.
 
 **How to build:** folder path without spaces, ~25 GB free; run `launcher\compilar.cmd`, open `GoW2 Launcher.exe`, Install
