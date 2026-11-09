@@ -56,7 +56,7 @@ if (TemPython) { Write-Host 'já instalado' } else { InstalaPeloWinget 'Python.P
 
 Msg '2/4  Compilador C++ (Visual Studio 2022 Build Tools). É o passo mais demorado.'
 if (TemVS) { Write-Host 'já instalado' } else {
-    InstalaPeloWinget 'Microsoft.VisualStudio.2022.BuildTools' @('--override', '--quiet --wait --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.VisualStudio.Component.VC.Llvm.Clang --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --includeRecommended')
+    InstalaPeloWinget 'Microsoft.VisualStudio.2022.BuildTools' @('--override', '--quiet --wait --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.VisualStudio.Component.VC.Llvm.Clang --includeRecommended')
 }
 
 Msg '3/4  Vulkan SDK (para o AMD FSR 3.1)'
