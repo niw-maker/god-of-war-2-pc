@@ -34,7 +34,7 @@ Name: "desktopicon"; Description: "Criar atalho na Área de Trabalho"; GroupDesc
 Name: "startmenu"; Description: "Criar atalho no Menu Iniciar"; GroupDescription: "Atalhos:"
 
 [Files]
-Source: "{#Fonte}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "docs\*,instalador\*,.git*"
+Source: "{#Fonte}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "\docs,\instalador,.git*"
 
 [Icons]
 Name: "{group}\God of War II"; Filename: "{app}\GoW2 Launcher.exe"; WorkingDir: "{app}"; Tasks: startmenu
