@@ -1,133 +1,203 @@
-# Fork: AMD FSR 3.1 e correções de desempenho (feito com IA)
+# God of War II — port nativo para PC · fork estável (feito com IA)
 
-> **Tudo neste fork foi feito com IA.** O código, os testes, este texto, o próprio fork no GitHub e a issue enviada ao
-> criador foram escritos pelo **Claude** (modelo de IA da Anthropic), conduzido por um usuário (`niw-maker`) que pediu as
-> melhorias e jogou para conferir.
+**Fork do [port do otavix010](https://github.com/otavix010/god-of-war-2-pc) com as cutscenes funcionando, o jogo passando
+do Colosso, cartão de memória, menos travadas, AMD FSR 3.1 e um instalador de um clique.**
+
+[![Release](https://img.shields.io/github/v/release/niw-maker/god-of-war-2-pc?label=vers%C3%A3o)](https://github.com/niw-maker/god-of-war-2-pc/releases/latest)
+![Base](https://img.shields.io/badge/base-0.1.3%20do%20otavix010-blue)
+![Feito com IA](https://img.shields.io/badge/feito%20com-IA%20(Claude)-8A2BE2)
+![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6)
+![Estado](https://img.shields.io/badge/estado-beta%20(jogo%20inteiro%20n%C3%A3o%20testado)-orange)
+
+> **Tudo neste fork foi feito com IA.** O código, os testes, este texto, o próprio fork no GitHub, o instalador e a issue
+> enviada ao criador foram escritos pelo **Claude** (modelo de IA da Anthropic), conduzido por um usuário (`niw-maker`) que
+> pediu as melhorias e jogou para conferir.
 >
 > **O jogo inteiro ainda não foi testado.** Os testes foram automatizados pela IA (roteiros de botões, medição de tempo de
-> cada quadro, gravação e análise de vídeo e de som) na abertura, na primeira área e em 7 saves, mais algumas partidas do
-> usuário. Ninguém jogou do começo ao fim com estas mudanças. Espere bugs.
+> cada quadro, gravação e análise de vídeo e de som) na abertura, na primeira área e em 7 saves espalhados pelo jogo, mais
+> as partidas do usuário (que passou do Colosso e da segunda luta). **Talvez dê para zerar, mas ninguém jogou do começo ao
+> fim.** Espere bugs e relate o que encontrar.
 >
 > **Você precisa da sua própria ISO** do *God of War II* (EUA, SCUS-97481). Nada do jogo vem neste repositório, e nenhuma
 > ISO deve ser enviada a ele.
 
-[English below](#fork-ai-made-amd-fsr-31-and-performance-fixes)
+[English below](#god-of-war-ii--native-pc-port--stable-fork-ai-made)
 
 ![antes e agora](docs/comparacao.gif)
 
-*À esquerda, o port original 0.1.3 como foi baixado; à direita, este fork, na mesma área, com o medidor de FPS (F10). Jogado pelo usuário, sem som, na mesma máquina. O GIF tem 50 quadros por segundo (o máximo do formato); para ver a fluidez completa, baixe o [vídeo de 25 s em 60 fps](docs/comparacao.mp4). A gravação da tela foi feita a 60 fps, então os quadros gerados acima disso não aparecem nela.*
+*Em cima, o port original 0.1.3 como foi baixado; embaixo, este fork, na mesma área, com o medidor de FPS (F10). Jogado
+pelo usuário, sem som, na mesma máquina. O GIF tem 50 quadros por segundo (o máximo do formato); para ver a fluidez
+completa, baixe o [vídeo de 25 s em 60 fps](docs/comparacao.mp4). A gravação da tela foi feita a 60 fps, então os quadros
+gerados acima disso não aparecem nela.*
 
-## Base
+## Instalar (jeito fácil)
 
-Este fork parte da **versão 0.1.3** do port do [otavix010](https://github.com/otavix010/god-of-war-2-pc) (commit `96c38ea`),
-que ainda gerava o jogo com o PS2Recomp e patches. A partir da 0.1.4 o criador passou a usar um motor próprio, distribuído
-compilado, e estas mudanças não se aplicam a ele diretamente. Elas estão no patch `patches/zz_claude_gs_audio.patch` (sobre o
-PS2Recomp fixado) e nos arquivos listados abaixo, para quem quiser levá-las adiante.
-
-## O que muda
-
-**Imagem e fluidez**
-- **AMD FSR 3.1 (geração de quadros)**, opção "AMD FSR 3.1 (recomendado)" no launcher: o jogo continua desenhando em OpenGL,
-  e a imagem final passa por uma apresentação em Vulkan, onde o swapchain do FSR 3.1 (FidelityFX SDK 2.4, DLLs assinadas da
-  AMD) gera um quadro entre cada dois. Na RTX 3060 a AMD escolhe a versão 3.1.6. Cortes de câmera recomeçam a interpolação;
-  vídeos (FMV) passam sem geração.
-- **Um quadro em cada quatro se perdia** entre o jogo e a janela (a janela capturava por vsync, fora de fase com as cópias
-  do jogo): agora todos os quadros chegam à tela, com ou sem o FSR.
-- **Pausas da tela de 70 a 400 ms** vindas da thread da janela (um registro de depuração que travava um mutex do GS e a
-  gravação do registro de quadros no disco) foram eliminadas.
-- **Thread de desenho do GS pelo launcher**: o `ambiente.txt` era lido depois de o GS decidir se usava a thread própria.
-  (O criador corrigiu o mesmo problema no motor 0.1.2.)
-
-**Launcher (`launcher\`)**
-- Aba **Instalação**: instala as dependências pelo winget e gera o jogo a partir da sua ISO, sem terminal.
-- **Diagnóstico completo**: cada partida grava em `out\diagnosticos` o registro, o tempo de cada quadro, um vídeo da janela
-  (ffmpeg) e as opções usadas.
-- Medidor (F10) com os quadros gerados: "FPS x + y gerados = z na tela".
-
-**Jogo**
-- Start pula as cutscenes em vídeo; o volume dos vídeos segue o volume do jogo.
-- Relógio do cartão de memória no fuso do PS2 japonês (data dos saves correta); F5 abre o menu de salvar em qualquer ponto
-  (`jogar_dev.cmd`).
-- Espera do FINISH do GS adaptativa (sem ela nas áreas pesadas, onde o processador e o GS trabalham em paralelo).
-
-## Medido (i7-10700, RTX 3060, tela cheia 1080p, FSR 1 + FXAA, aberto pelo launcher)
-
-| Trecho | 0.1.3 original | Este fork |
-|---|---|---|
-| Primeira área, combate | 12-19 fps, linha bugada embaixo | 34-49 fps reais, ~70-90 na tela com o FSR 3.1 |
-| Saves com pouca luta (7 testados) | 47-60 | 58-60 |
-
-## Como instalar (jeito fácil)
-
-1. Baixe o instalador `GoW2-fork-IA-setup-*.exe` na página de [Releases](https://github.com/niw-maker/god-of-war-2-pc/releases/latest)
+1. Baixe o instalador `GoW2-fork-IA-setup-*.exe` em [Releases](https://github.com/niw-maker/god-of-war-2-pc/releases/latest)
    e instale (pasta padrão `C:\GoW2`; ele cria atalhos no Menu Iniciar e na Área de Trabalho).
-2. Abra o **God of War II** pelo atalho. Na aba **Instalação**, clique em **"Instalar tudo e gerar o jogo"** e escolha a **sua** ISO.
-   Uma janela instala o que faltar (Python, compilador C++, Vulkan SDK) e gera o jogo: espere ela dizer **PRONTO**
-   (30 min a 1h30; se o Windows pedir permissão, clique em Sim).
-3. Clique em **JOGAR**. Em "Frame generation", deixe "AMD FSR 3.1 (recomendado)".
+   O instalador não tem assinatura digital: se o Windows avisar, clique em *Mais informações → Executar assim mesmo*.
+2. Abra o **God of War II** pelo atalho. Na aba **Instalação**, clique em **"Instalar tudo e gerar o jogo"** e escolha a
+   **sua** ISO. Uma janela instala o que faltar (Python, compilador C++ da Microsoft, Vulkan SDK) e gera o jogo: espere ela
+   dizer **PRONTO** (de 1 a 2 horas na primeira vez; se o Windows pedir permissão, clique em Sim).
+3. Clique em **JOGAR**. Em "Frame generation", deixe "AMD FSR 3.1 (recomendado)". **F10** mostra o medidor de FPS.
 
-Precisa de Windows 10/11 de 64 bits, processador com AVX2, 16 GB de RAM e uns 25 GB livres.
+Precisa de Windows 10/11 de 64 bits com winget, processador com AVX2, 16 GB de RAM e uns 35 GB livres. O caminho completo
+(instalador → dependências → jogo gerado) foi testado num Windows limpo (Windows Sandbox).
 
-**Sem o instalador:** com o código deste repositório numa pasta sem espaços, clique duas vezes em `launcher\compilar.cmd` e
-abra `GoW2 Launcher.exe`, ou rode `instalar_tudo.ps1 -Iso <sua ISO>`.
+**Sem o instalador:** com o código deste repositório numa pasta sem espaços, clique duas vezes em `launcher\compilar.cmd`
+e abra `GoW2 Launcher.exe`, ou rode `instalar_tudo.ps1 -Iso <sua ISO>`. Sem o launcher: `gerar.cmd` e `jogar.cmd`, como no
+original. Sem o Vulkan SDK, o jogo compila igual, só que sem o FSR 3.1.
 
-Sem o launcher: `gerar.cmd` e `jogar.cmd`, como no original. Sem o Vulkan SDK, o jogo compila igual, só que sem o FSR 3.1.
+## Antes e agora
+
+| | 0.1.3 original (base) | Este fork |
+|---|---|---|
+| Cutscenes em vídeo | tela preta / travavam; **não dava para passar do Colosso** | tocam com imagem, som e legenda; o usuário passou do Colosso e da segunda luta |
+| Primeiro chefe | o jogo travava (função fora do mapa) | passa |
+| Salvar | o jogo dizia que não havia cartão de memória | salva e carrega no cartão; data do save correta |
+| Imagem | faixa verde/roxa embaixo, tracinhos verdes, partículas em "cata-vento" | corrigidas |
+| Som | adiantava ~8,5% em combate; tom agudo no lugar do som de alguns vídeos | no tempo certo |
+| Primeira área, combate (i7-10700 + RTX 3060, 1080p) | **12-19 fps** | **34-49 fps reais, ~70-90 na tela** com o FSR 3.1 |
+| Saves com pouca luta (7 testados) | 47-60 fps | 58-60 fps |
+| Travadas em combate (pausas acima de 100 ms por minuto) | 40-115 (antes destes ajustes) | 0-1,4 |
+
+As medidas de fps foram feitas com a compilação **clang-cl + PGO** do PC de testes. O gerador deste repositório compila
+com o **MSVC**, que nos 7 saves deu média de 46,6-56,5 fps contra 54,5-59,8 com PGO. As duas ainda não foram comparadas na
+primeira área.
+
+**E a versão atual do criador (0.1.6, motor fechado)?** Ela corrigiu, por conta própria, o cartão de memória, a thread de
+desenho pelo launcher e a faixa verde. Não tem o FSR 3.1 nem as outras correções de fluidez deste fork. Num teste rápido do
+usuário, na mesma máquina, ficou em 30-40 fps com quedas para 17. Como o motor dela é distribuído compilado, as mudanças
+deste fork não se aplicam a ela diretamente; por isso este fork parte da 0.1.3, a última versão com o código aberto.
+
+## Todas as mudanças
+
+### Dá para avançar no jogo
+- **Cutscenes em vídeo voltaram.** Na 0.1.3 elas ficavam em tela preta e o jogo não passava do Colosso. Eram cinco defeitos
+  no decodificador de vídeo (MPEG) e no som (SPU2):
+  - o jogo cria o decodificador duas vezes por filme, e a segunda apagava o cabeçalho do vídeo (a causa da tela preta);
+  - os tipos de áudio estavam trocados (PCM/ADPCM), então o som não chegava ao jogo, que desistia do vídeo depois de ~4 s;
+  - o aviso de "fim do vídeo" não era zerado, e o vídeo seguinte nascia terminado;
+  - um tom agudo de 1.714 Hz saía no lugar do som do filme;
+  - o jogo travava ao pular vídeos em sequência (menu Tesouros > Cenas do Jogo).
+  As legendas em português ficam dentro dos próprios vídeos, então elas voltaram junto.
+- **Travamento no primeiro chefe:** o jogo pulava para uma função que o mapa de funções não tinha (`0x1495D0`). Foram
+  acrescentadas 293 entradas que faltavam no mapa (`jogo/entradas_extra.txt`).
+- **Proteção no fim dos vídeos** (QTE do Colosso): se o jogo ficar esperando o fim de um vídeo que já acabou, o port o
+  libera (`jogo/overrides/gow2_claude.cpp`).
+
+### Salvar
+- **Cartão de memória funcionando** (`PS2X_MC_SIO2=1`): a 0.1.3 dizia que não havia cartão. O cartão é emulado como no
+  PS2, no formato `.ps2` do PCSX2, depois de corrigir dois defeitos do processador de som e entrada (IOP): cargas
+  desalinhadas seguidas (`LWL`/`LWR`) liam um valor antigo, e os comandos do cartão iam em blocos de DMA errados.
+- **Data dos saves correta:** a leitura do relógio (`sceCdReadClock`) não era tratada ("Invalid Date") e agora entrega a
+  hora do Japão, como o console espera (antes o save aparecia 12 horas atrasado).
+- **F5 salva em qualquer ponto** (ferramenta de desenvolvedor, `jogar_dev.cmd` ou opção no launcher): abre o menu de
+  salvar do próprio jogo, num cartão separado.
+
+### Imagem
+- **AMD FSR 3.1 (geração de quadros):** o jogo continua desenhando em OpenGL, e a imagem final passa por uma apresentação
+  em Vulkan, onde o FSR 3.1 (FidelityFX SDK 2.4, DLLs assinadas da AMD, baixadas na instalação) gera um quadro entre cada
+  dois. Cortes de câmera recomeçam a interpolação; vídeos passam sem geração.
+- **Geração de quadros própria** (opção sem Vulkan): shaders que estimam o movimento entre dois quadros ou só misturam os
+  dois.
+- **Faixa verde/roxa embaixo, tracinhos verdes a cada 64 px e "fantasma" do brilho:** os sprites eram amostrados meio pixel
+  adiantados, e o efeito de brilho lia uma linha de fora do quadro.
+- **Partículas em "cata-vento":** um valor de textura (o `Q` do GIF) era aplicado na hora em vez de no vértice seguinte.
+- **Resolução interna 2× (opcional):** uma passada extra só da geometria, composta como detalhe sobre a imagem. É pesada
+  (24-28 fps), por isso vem desligada.
+
+### Fluidez
+- **Um quadro em cada quatro se perdia** entre o jogo e a janela: a janela capturava no ritmo do monitor, fora de fase com o
+  jogo. Agora todo quadro chega à tela, com ou sem o FSR.
+- **Pausas da tela de 70 a 400 ms** vindas da janela (um registro de depuração que travava um mutex do GS e a gravação do
+  registro de quadros no disco) foram eliminadas.
+- **A janela não espera mais o GS:** com a placa de vídeo carregada, a tela caía para 10-20 atualizações por segundo.
+- **Thread de desenho do GS pelo launcher:** o `ambiente.txt` era lido depois de o GS decidir se usava a thread própria.
+- **Menos travadas em combate:** efeitos que leem o próprio quadro (distorção das lâminas, desfoque do brilho) faziam até
+  ~25 mil cópias por intervalo; agora desenhos que leem a mesma textura compartilham a cópia. A espera do FINISH do GS
+  ficou adaptativa (desligada só nas áreas pesadas), e o pré-processamento do GS (`PS2X_GS_PRE`) foi desligado.
+
+### Som
+- **Som no tempo certo:** o relógio do IOP adiantava ~8,5% em combate; agora fica preso ao tempo real.
+- **Volume dos vídeos** segue o volume de música do jogo, e **Start pula** os vídeos (a abertura também).
+
+### Launcher e instalação
+- **Instalador** com atalhos no Menu Iniciar e na Área de Trabalho, e o botão **"Instalar tudo e gerar o jogo"**.
+- **Launcher** (`launcher\`): opções de imagem (escalonador, nitidez, FXAA, resolução 2×, geração de quadros),
+  predefinições, cartões de memória com nome, backup dos saves e **diagnóstico completo** (registro, tempo de cada quadro,
+  vídeo da janela e opções usadas, em `out\diagnosticos`).
+- **Medidor (F10)** com os quadros gerados: "FPS x + y gerados = z na tela".
+
+### Para desenvolvedores
+- Tudo o que muda no runtime está em `patches/zz_claude_gs_audio.patch`, sobre o PS2Recomp fixado.
+- Porta de controle para testes automáticos (`PS2X_CONTROLE=<porta>`: ler e escrever a memória, apertar botões, tirar
+  fotos) e gravação de vídeo da janela (`PS2X_GRAVA`).
 
 ## Problemas conhecidos
+- O jogo inteiro não foi testado.
 - A ampliação temporal do FSR 3.1 não foi feita: precisa de vetores de movimento, e a câmera da memória do jogo não explica
   um balanço de 6-7 px por quadro (investigação em andamento).
-- Nas áreas mais pesadas o jogo fica em ~38-45 fps reais num i7-10700 (a emulação do VU1 é o gargalo).
-- O erro `989 ERROR 55` do som apareceu uma vez ao carregar um save e não se repetiu.
-- O aviso "controle removido" apareceu uma vez ao ligar o DualSense com o jogo aberto.
+- Nas áreas mais pesadas, ~35-45 fps reais num i7-10700: a emulação do VU1 é o gargalo.
+- O erro de som `989 ERROR 55` apareceu uma vez ao carregar um save e não se repetiu; o aviso "controle removido" apareceu
+  uma vez ao ligar o DualSense com o jogo aberto.
 
 ## Créditos
 - Port original: [otavix010](https://github.com/otavix010/god-of-war-2-pc).
 - Ideias e endereços da espera do FINISH: [cxldsakeb](https://github.com/cxldsakeb) (GoW2-nativo-PS2, GPL-3.0).
 - [PS2Recomp](https://github.com/ran-j/PS2Recomp) (ran-j); [AMD FidelityFX SDK](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK)
   (licença MIT; as DLLs são baixadas pelo gerador, não vêm no repositório).
+- *God of War* é marca da Sony Interactive Entertainment; este projeto de fãs não tem relação com ela.
 
 ---
 
-# Fork (AI-made): AMD FSR 3.1 and performance fixes
+# God of War II — native PC port · stable fork (AI-made)
 
-> **Everything in this fork was made with AI.** The code, the tests, this text, the GitHub fork itself and the issue sent
-> to the original author were written by **Claude** (Anthropic's AI model), directed by a user (`niw-maker`) who asked for
-> the improvements and played to check them.
+**A fork of [otavix010's port](https://github.com/otavix010/god-of-war-2-pc) with working cutscenes, the game getting past
+the Colossus, memory card saves, fewer stutters, AMD FSR 3.1 and a one-click installer.**
+
+> **Everything in this fork was made with AI.** The code, the tests, this text, the GitHub fork itself, the installer and the
+> issue sent to the original author were written by **Claude** (Anthropic's AI model), directed by a user (`niw-maker`) who
+> asked for the improvements and played to check them.
 >
 > **The whole game has not been tested yet.** Testing was automated by the AI (button scripts, per-frame timing, video and
-> audio capture and analysis) on the intro, the first area and 7 saves, plus a few play sessions by the user. Nobody has
-> played it start to finish with these changes. Expect bugs.
+> audio analysis) on the intro, the first area and 7 saves across the game, plus the user's play sessions (past the Colossus
+> and the second fight). **It may be finishable, but nobody has played it start to finish.** Expect bugs.
 >
-> **You need your own ISO** of *God of War II* (USA, SCUS-97481). No game data is in this repository, and no ISO should
-> ever be uploaded to it.
+> **You need your own ISO** of *God of War II* (USA, SCUS-97481). No game data is in this repository.
 
-Based on the original port's **0.1.3** (commit `96c38ea`, PS2Recomp + patches). From 0.1.4 on the author uses his own
-prebuilt engine, so these changes don't apply to it directly; they live in `patches/zz_claude_gs_audio.patch` and the files
-below for anyone who wants to carry them forward.
+**Install:** download `GoW2-fork-IA-setup-*.exe` from [Releases](https://github.com/niw-maker/god-of-war-2-pc/releases/latest),
+install it (default `C:\GoW2`, Start menu and desktop shortcuts), open it, Install tab → "Instalar tudo e gerar o jogo" and
+pick **your** ISO; one window installs what's missing (Python, C++ build tools, Vulkan SDK) and generates the game. Then
+PLAY. The full path was tested on a clean Windows (Windows Sandbox).
 
-**Changes:** AMD FSR 3.1 frame generation through a Vulkan presenter on top of the OpenGL renderer (FidelityFX SDK 2.4,
-AMD-signed DLLs; scene cuts reset it, FMVs pass through); one frame in four was being lost between the game and the window
-(fixed); 70-400 ms window stalls removed; the launcher lost the GS drawing thread because `ambiente.txt` was read too late
-(also fixed by the author in engine 0.1.2); a launcher with an **Install** tab (dependencies via winget, generate from your
-ISO) and a **full diagnostics** mode (log, frame times, window video); FPS meter shows generated frames; Start skips FMVs;
-FMV volume follows the game; memory card clock; adaptive GS FINISH wait.
+**What changed over 0.1.3:**
+- **Playable further:** video cutscenes were black and the game couldn't get past the Colossus. Five MPEG/SPU2 defects
+  fixed (the second `sceMpegCreate` per movie wiped the sequence header; PCM/ADPCM stream types swapped; end flag not
+  cleared; a 1,714 Hz tone instead of the movie audio; a hang when skipping movies). A first-boss hang (function missing
+  from the map at `0x1495D0`) fixed with 293 map entries. A safety release for end-of-movie waits.
+- **Saving:** the memory card now works (emulated over SIO2; two IOP bugs fixed: back-to-back `LWL`/`LWR` load delay and
+  SIO2 DMA block layout); `sceCdReadClock` handled, in Japan time as the console expects (correct save dates); F5 dev save.
+- **Image:** AMD FSR 3.1 frame generation through a Vulkan presenter on top of the OpenGL renderer; an alternative
+  shader-based frame generation; sprite sampling half a pixel off (green/purple band, green dashes, bloom ghost); GIF `Q`
+  applied too early (pinwheel particles); optional 2× internal resolution.
+- **Smoothness:** one frame in four lost between game and window; 70-400 ms window stalls; the window no longer waits for
+  the GS; the launcher lost the GS drawing thread (`ambiente.txt` read too late); feedback-texture batching (up to ~25k
+  copies per interval), adaptive FINISH wait, `PS2X_GS_PRE=0`.
+- **Sound:** IOP clock tied to real time (it ran ~8.5% fast in combat); FMV volume follows the game; Start skips FMVs.
+- **Launcher and installer:** one-click install, image options and presets, named memory cards, save backup, full
+  diagnostics, FPS meter with generated frames.
 
-![before and after](docs/comparacao.gif)
+**Measured** (i7-10700 + RTX 3060, 1080p): first-area combat 12-19 fps on 0.1.3 → 34-49 real fps, ~70-90 on screen with
+FSR 3.1; light saves 47-60 → 58-60; combat stalls over 100 ms 40-115 → 0-1.4 per minute. Measured with a clang-cl + PGO build; the
+generator here builds with MSVC (7-save average 46.6-56.5 vs 54.5-59.8 with PGO). The author's current 0.1.6 (closed
+prebuilt engine) ran at 30-40 fps with drops to 17 in a quick test on the same PC.
 
-*Left: original 0.1.3 as downloaded; right: this fork, same area, FPS meter on. Played by the user, same PC. The GIF runs at 50 fps (the format's practical limit); download the [25 s 60 fps video](docs/comparacao.mp4) to see the full smoothness. The screen capture ran at 60 fps, so generated frames above that aren't in it.*
-
-**Measured** (i7-10700, RTX 3060, fullscreen 1080p, from the launcher): first-area combat 12-19 fps → 34-49 real fps, ~70-90 shown
-with FSR 3.1; light saves 47-60 → 58-60.
-
-**How to install:** download `GoW2-fork-IA-setup-*.exe` from [Releases](https://github.com/niw-maker/god-of-war-2-pc/releases/latest),
-install it (default `C:\GoW2`, Start menu and desktop shortcuts), open it, Install tab → "Instalar tudo e gerar o jogo" and pick
-**your** ISO; one window installs what's missing (Python, C++ build tools, Vulkan SDK) and generates the game. Then PLAY.
-
-**Known issues:** no FSR 3.1 temporal upscaling yet (motion vectors); heaviest areas ~38-45 real fps on an i7-10700 (VU1
-emulation bound); one-off `989 ERROR 55` sound error and one "controller removed" message on hot-plug.
+**Known issues:** whole game untested; no FSR 3.1 temporal upscaling yet (motion vectors); heaviest areas ~35-45 real fps
+(VU1 emulation bound); one-off `989 ERROR 55` and one "controller removed" message.
 
 **Credits:** otavix010 (original port), cxldsakeb (FINISH-wait idea and addresses, GoW2-nativo-PS2, GPL-3.0), ran-j
-(PS2Recomp), AMD (FidelityFX SDK, MIT).
+(PS2Recomp), AMD (FidelityFX SDK, MIT). *God of War* is a trademark of Sony Interactive Entertainment; this fan project is
+not affiliated with it.
 
 ---
 
