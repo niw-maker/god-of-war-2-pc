@@ -1,6 +1,6 @@
 ﻿; Instalador do fork (Inno Setup 6). Gere com: ISCC instalador\gow2.iss /DFonte=<pasta com os arquivos do projeto>
 ; Não leva nada do jogo: só o gerador, os patches e o launcher. O jogo é gerado da ISO de quem instala.
-#define Versao "0.1.3-ia.1"
+#define Versao "0.1.3-ia.2"
 #ifndef Fonte
   #define Fonte ".."
 #endif
